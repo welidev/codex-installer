@@ -237,6 +237,14 @@ else
   fail "Pipe-installed wrapper has wrong shebang"
 fi
 
+# Verify the wrapper is readable and executable by the current user.
+if [ -r "$TEST_DIR/codex" ] && [ -x "$TEST_DIR/codex" ]; then
+  perms=$(stat -c '%a' "$TEST_DIR/codex" 2>/dev/null || stat -f '%Lp' "$TEST_DIR/codex" 2>/dev/null)
+  pass "Wrapper is readable+executable by current user (mode $perms)"
+else
+  fail "Wrapper is not readable+executable by current user"
+fi
+
 # cleanup from pipe test
 run_installer uninstall --yes >/dev/null 2>&1 || true
 

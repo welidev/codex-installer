@@ -601,9 +601,9 @@ installer_main() {
       cp "$src" "$dir/codex" && chmod +x "$dir/codex" && ok=1
     elif command -v sudo >/dev/null 2>&1; then
       if [ -t 0 ]; then
-        sudo cp "$src" "$dir/codex" && sudo chmod +x "$dir/codex" && ok=1
+        sudo cp "$src" "$dir/codex" && sudo chmod 755 "$dir/codex" && ok=1
       elif sudo -n cp "$src" "$dir/codex" 2>/dev/null; then
-        sudo -n chmod +x "$dir/codex" 2>/dev/null
+        sudo -n chmod 755 "$dir/codex" 2>/dev/null
         ok=1
       fi
     fi

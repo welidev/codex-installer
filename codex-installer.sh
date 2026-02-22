@@ -28,6 +28,7 @@ usage() {
   printf "\n"
   printf "Commands:\n"
   printf "  install          Install or update the OpenAI Codex CLI (default)\n"
+  printf "  update|upgrade   Aliases for 'install' (wrapper mode only)\n"
   printf "  uninstall        Remove the installed Codex CLI binary and wrapper\n"
   printf "  update-wrapper   Replace the wrapper script with the latest from GitHub\n"
   printf "\n"
@@ -40,6 +41,7 @@ usage() {
   printf "  INSTALL_DIR             Installation directory (default: /usr/local/bin)\n"
   printf "  CODEX_UPDATE_MODE       Update mode: auto|prompt|never (default: prompt)\n"
   printf "  CODEX_UPDATE_INTERVAL   Check interval: always|<duration> (default: 24h)\n"
+  printf "                          Units: s, m, h, d, w, mo (months), y (years)\n"
   printf "  WRAPPER_REPO            GitHub repo for wrapper updates (default: welidev/codex-installer)\n"
 }
 
@@ -158,7 +160,8 @@ resolve_config_dirs() {
 
 # ── Parse human-readable interval to seconds ──────────────────────────────
 # Accepts "always", "0", or "<number><unit>" where unit is one of:
-#   s/sec/seconds, m/min/minutes, h/hr/hours, d/day/days, w/wk/weeks
+#   s/sec/seconds, m/min/minutes, h/hr/hours, d/day/days, w/wk/weeks,
+#   mo/month/months (~30d), y/yr/years (~365d)
 # Compact ("24h") and spaced ("24 hours") forms both work.
 parse_interval() {
   local input="$1"
@@ -178,6 +181,8 @@ parse_interval() {
     h|hr|hrs|hour|hours)         printf '%s' "$((num * 3600))" ;;
     d|day|days)                  printf '%s' "$((num * 86400))" ;;
     w|wk|wks|week|weeks)         printf '%s' "$((num * 604800))" ;;
+    mo|month|months)             printf '%s' "$((num * 2592000))" ;;
+    y|yr|yrs|year|years)         printf '%s' "$((num * 31536000))" ;;
     *)                           printf '86400' ;;
   esac
 }
@@ -232,7 +237,8 @@ create_default_config() {
 # UPDATE_MODE=prompt
 #
 # UPDATE_INTERVAL: always | <N><unit>  (default: 24h)
-#   Examples: 24h, 30m, 7d, 1w, "24 hours", "1 week"
+#   Units: s, m, h, d, w, mo (months), y (years)
+#   Examples: 24h, 30m, 7d, 1w, 3mo, 1y, "24 hours", "1 month"
 # UPDATE_INTERVAL=24h
 CFGEOF
 )
@@ -662,10 +668,10 @@ wrapper_main() {
 # ── Mode detection & dispatch ─────────────────────────────────────────────
 if [ -x "$CODEX_REAL" ]; then
   case "${1:-}" in
-    install)        shift; installer_main "$@" ;;
-    uninstall)      shift; do_uninstall "$@" ;;
-    update-wrapper) shift; do_update_wrapper "$@" ;;
-    *)              wrapper_main "$@" ;;
+    install|update|upgrade) shift; installer_main "$@" ;;
+    uninstall)              shift; do_uninstall "$@" ;;
+    update-wrapper)         shift; do_update_wrapper "$@" ;;
+    *)                      wrapper_main "$@" ;;
   esac
 else
   case "${1:-}" in

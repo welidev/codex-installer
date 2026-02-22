@@ -11,6 +11,14 @@ TEST_DIR="$(mktemp -d)"
 PASS=0
 FAIL=0
 
+# ── Guard: refuse to run if codex is already installed ────────────────────
+if command -v codex >/dev/null 2>&1; then
+  printf "ERROR: 'codex' is already installed at %s\n" "$(command -v codex)" >&2
+  printf "Self-test refuses to run when codex is in the PATH to avoid interference.\n" >&2
+  printf "Remove or rename it, or adjust your PATH, then re-run.\n" >&2
+  exit 1
+fi
+
 # ── Colors ─────────────────────────────────────────────────────────────────
 if [ -t 1 ]; then
   RED='\033[0;31m'; GREEN='\033[0;32m'; BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
